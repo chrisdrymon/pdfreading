@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -18,7 +19,7 @@ def getcost(beadtype, driver):
     driver.get('https://www.fusionbeads.com/search?keywords={}'.format(beadtype))
     try:
         wait = WebDriverWait(driver, 10)
-        men_menu = wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='facets-item-cell-grid']")))
+        wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='facets-item-cell-grid']")))
 
     except TimeoutError:
         pass
@@ -30,7 +31,7 @@ def getcost(beadtype, driver):
         for meta in webdress:
             if meta.has_attr('content'):
                 contents = meta.get('content')
-                if contents[:8] == '/Size-11':
+                if contents[:8] == '/Size-11' or contents[:8] == '/size-11':
                     pricesite = 'https://www.fusionbeads.com/' + contents
                     pricesource = requests.get(pricesite).text
                     pricesoup = BeautifulSoup(pricesource, 'lxml')
@@ -105,14 +106,10 @@ while j < len(chartList):
     try:
         costList.append(countList[j]*per1kList[j]/1000)
         total = total + costList[j]
-        print("Is numeric!")
         j += 1
     except TypeError:
         costList.append('NA')
-        print("Not numeric")
         j += 1
-
-costList.append(total)
 
 df = pd.DataFrame(list(zip(chartList, beadList, colorList, countList, per1kList, costList)), columns=['Chart', 'Bead',
                                                                                                       'Color', 'Count',
@@ -120,4 +117,6 @@ df = pd.DataFrame(list(zip(chartList, beadList, colorList, countList, per1kList,
 theDriver.quit()
 print(df)
 print("Total:", total)
-df.to_csv('beads.csv')
+savePath = os.path.join(os.environ['HOME'], 'desktop', 'newpattern.csv')
+df.to_csv(savePath)
+print('File output as:', savePath)
