@@ -43,8 +43,8 @@ def getcost(beadtype, driver):
 
 
 theDriver = webdriver.Firefox()
-
-document = open('Eagle Vision.pdf', 'rb')
+filename = 'cougar'
+document = open('{}.pdf'.format(filename), 'rb')
 
 # Create resource manager
 rsrcmgr = PDFResourceManager()
@@ -58,13 +58,16 @@ device = PDFPageAggregator(rsrcmgr, laparams=laparams)
 
 interpreter = PDFPageInterpreter(rsrcmgr, device)
 
-pdfPages = PDFPage.get_pages(document, pagenos=[1, 2])
+pdfPages = PDFPage.get_pages(document, pagenos=[1])
 chartList = []
 beadList = []
 colorList = []
 countList = []
 per1kList = []
 costList = []
+per1kTotal = 0
+countTotal = 0
+
 for page in pdfPages:
     interpreter.process_page(page)
 
@@ -81,9 +84,14 @@ for page in pdfPages:
                     beadList.append(line)
                     print(line)
                     letterPart = line[:2]
-                    numPart = int(line[3:])
-                    newNum = '{:04}'.format(numPart)
-                    newBead = letterPart + newNum
+                    try:
+                        numPart = int(line[3:])
+                        newNum = '{:04}'.format(numPart)
+                        newBead = letterPart + newNum
+                    except ValueError:
+                        numPart = int(line[3:-1])
+                        newNum = '{:04}'.format(numPart)
+                        newBead = letterPart + newNum + line[-1:]
                     gotCost = getcost(newBead, theDriver)
                     try:
                         per1k = float(gotCost)
@@ -93,11 +101,13 @@ for page in pdfPages:
                     finally:
                         per1kList.append(per1k)
                     print(per1k)
+                    per1kTotal = per1kTotal + float(per1k)
                 if i == 2:
                     colorList.append(line)
                     print(line)
                 if i == 3:
                     countList.append(int(line[6:]))
+                    countTotal = countTotal + int(line[6:])
                     print(line[6:])
                 i += 1
 j = 0
@@ -115,11 +125,11 @@ df = pd.DataFrame(list(zip(chartList, beadList, colorList, countList, per1kList,
                                                                                                       'Color', 'Count',
                                                                                                       'Per1K', 'Cost'])
 theDriver.quit()
-lastRow = [[' ', ' ', ' ', ' ', 'Total', total]]
+lastRow = [[' ', ' ', 'Totals', countTotal, per1kTotal, total]]
 dfLast = pd.DataFrame(lastRow, columns=['Chart', 'Bead', 'Color', 'Count', 'Per1K', 'Cost'])
 dfFinal = df.append(dfLast)
 print(dfFinal)
 print("Total:", total)
-savePath = os.path.join(os.environ['HOME'], 'desktop', 'newpattern.csv')
+savePath = os.path.join(os.environ['HOME'], 'desktop', filename + '.csv')
 dfFinal.to_csv(savePath)
 print('File output as:', savePath)
