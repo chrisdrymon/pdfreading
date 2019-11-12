@@ -133,6 +133,8 @@ theDriver.quit()
 lastRow = [[' ', ' ', 'Totals', countTotal, per1kTotal, total]]
 dfLast = pd.DataFrame(lastRow, columns=['Chart', 'Bead', 'Color', 'Count', 'Per1K', 'Cost'])
 dfFinal = df.append(dfLast)
+dfFinal['Per1K'] = dfFinal['Per1K'].map('${:,.2f}'.format)
+dfFinal['Cost'] = dfFinal['Cost'].map('${:,.2f}'.format)
 print(dfFinal)
 print("Total:", total)
 savePath = filename[:-4] + '.csv'
