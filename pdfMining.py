@@ -1,6 +1,5 @@
 import pandas as pd
 import requests
-import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -11,6 +10,8 @@ from pdfminer.converter import PDFPageAggregator
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
 from pdfminer.pdfpage import PDFPage
 from pdfminer.layout import LTTextBoxHorizontal
+from tkinter import filedialog
+from tkinter import *
 
 
 def getcost(beadtype, driver):
@@ -42,9 +43,13 @@ def getcost(beadtype, driver):
     return thecost
 
 
+root = Tk()
+root.filename = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("PDF", "*.pdf"),
+                                                                                           ("All Files", "*.*")))
+print(root.filename)
 theDriver = webdriver.Firefox()
-filename = 'cougar'
-document = open('{}.pdf'.format(filename), 'rb')
+filename = root.filename
+document = open(filename, 'rb')
 
 # Create resource manager
 rsrcmgr = PDFResourceManager()
@@ -58,7 +63,7 @@ device = PDFPageAggregator(rsrcmgr, laparams=laparams)
 
 interpreter = PDFPageInterpreter(rsrcmgr, device)
 
-pdfPages = PDFPage.get_pages(document, pagenos=[1])
+pdfPages = PDFPage.get_pages(document, pagenos=[1, 2])
 chartList = []
 beadList = []
 colorList = []
@@ -130,6 +135,6 @@ dfLast = pd.DataFrame(lastRow, columns=['Chart', 'Bead', 'Color', 'Count', 'Per1
 dfFinal = df.append(dfLast)
 print(dfFinal)
 print("Total:", total)
-savePath = os.path.join(os.environ['HOME'], 'desktop', filename + '.csv')
+savePath = filename[:-4] + '.csv'
 dfFinal.to_csv(savePath)
 print('File output as:', savePath)
