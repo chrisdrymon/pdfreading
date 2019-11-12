@@ -115,8 +115,11 @@ df = pd.DataFrame(list(zip(chartList, beadList, colorList, countList, per1kList,
                                                                                                       'Color', 'Count',
                                                                                                       'Per1K', 'Cost'])
 theDriver.quit()
-print(df)
+lastRow = [[' ', ' ', ' ', ' ', 'Total', total]]
+dfLast = pd.DataFrame(lastRow, columns=['Chart', 'Bead', 'Color', 'Count', 'Per1K', 'Cost'])
+dfFinal = df.append(dfLast)
+print(dfFinal)
 print("Total:", total)
 savePath = os.path.join(os.environ['HOME'], 'desktop', 'newpattern.csv')
-df.to_csv(savePath)
+dfFinal.to_csv(savePath)
 print('File output as:', savePath)
