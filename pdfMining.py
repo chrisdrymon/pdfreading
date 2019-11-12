@@ -1,5 +1,4 @@
 import pandas as pd
-import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -28,17 +27,10 @@ def getcost(beadtype, driver):
     finally:
         html = driver.execute_script("return document.documentElement.outerHTML")
         selsoup = BeautifulSoup(html, 'lxml')
-        webdress = selsoup.findAll('meta')
-        for meta in webdress:
-            if meta.has_attr('content'):
-                contents = meta.get('content')
-                if contents[:8] == '/Size-11' or contents[:8] == '/size-11':
-                    pricesite = 'https://www.fusionbeads.com/' + contents
-                    pricesource = requests.get(pricesite).text
-                    pricesoup = BeautifulSoup(pricesource, 'lxml')
-                    for spanthing in pricesoup.findAll('span'):
-                        if spanthing.has_attr('data-rate'):
-                            thecost = spanthing.get('data-rate')
+        finddict = {'data-track-productlist-position': '0'}
+        firstwindow = selsoup.find('div', attrs=finddict)
+        costspot = firstwindow.find('span', class_='item-views-price-lead ng-binding')
+        thecost = costspot.get('data-rate')
 
     return thecost
 
