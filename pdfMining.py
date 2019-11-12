@@ -120,10 +120,10 @@ while j < len(chartList):
 
 df = pd.DataFrame(list(zip(chartList, beadList, colorList, countList, per1kList, costList)), columns=['Chart', 'Bead',
                                                                                                       'Color', 'Count',
-                                                                                                      'Per1K', 'Cost'])
+                                                                                                      'PerBag', 'Cost'])
 theDriver.quit()
 lastRow = [[' ', ' ', 'Totals', countTotal, per1kTotal, total]]
-dfLast = pd.DataFrame(lastRow, columns=['Chart', 'Bead', 'Color', 'Count', 'Per1K', 'Cost'])
+dfLast = pd.DataFrame(lastRow, columns=['Chart', 'Bead', 'Color', 'Count', 'PerBag', 'Cost'])
 dfFinal = df.append(dfLast)
 dfFinal['Per1K'] = dfFinal['Per1K'].map('${:,.2f}'.format)
 dfFinal['Cost'] = dfFinal['Cost'].map('${:,.2f}'.format)
