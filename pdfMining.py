@@ -19,7 +19,9 @@ def getcost(beadtype, driver):
     driver.get('https://www.fusionbeads.com/search?keywords={}'.format(beadtype))
     try:
         wait = WebDriverWait(driver, 10)
-        wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='facets-item-cell-grid']")))
+        wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='facets-item-cell-grid']" or
+                                                     "//div[@class='searchspring-no_results ss-targeted ng-scope']")))
+                                                                   "searchspring-no_results ss-targeted ng-scope"
 
     except TimeoutError:
         pass
@@ -28,9 +30,12 @@ def getcost(beadtype, driver):
         html = driver.execute_script("return document.documentElement.outerHTML")
         selsoup = BeautifulSoup(html, 'lxml')
         finddict = {'data-track-productlist-position': '0'}
-        firstwindow = selsoup.find('div', attrs=finddict)
-        costspot = firstwindow.find('span', class_='item-views-price-lead ng-binding')
-        thecost = costspot.get('data-rate')
+        try:
+            firstwindow = selsoup.find('div', attrs=finddict)
+            costspot = firstwindow.find('span', class_='item-views-price-lead ng-binding')
+            thecost = costspot.get('data-rate')
+        except AttributeError:
+            thecost = 0
 
     return thecost
 
@@ -55,7 +60,7 @@ device = PDFPageAggregator(rsrcmgr, laparams=laparams)
 
 interpreter = PDFPageInterpreter(rsrcmgr, device)
 
-pdfPages = PDFPage.get_pages(document, pagenos=[1, 2])
+pdfPages = PDFPage.get_pages(document, pagenos=[1, 2, 3])
 chartList = []
 beadList = []
 colorList = []
@@ -125,7 +130,7 @@ theDriver.quit()
 lastRow = [[' ', ' ', 'Totals', countTotal, per1kTotal, total]]
 dfLast = pd.DataFrame(lastRow, columns=['Chart', 'Bead', 'Color', 'Count', 'PerBag', 'Cost'])
 dfFinal = df.append(dfLast)
-dfFinal['Per1K'] = dfFinal['Per1K'].map('${:,.2f}'.format)
+dfFinal['PerBag'] = dfFinal['PerBag'].map('${:,.2f}'.format)
 dfFinal['Cost'] = dfFinal['Cost'].map('${:,.2f}'.format)
 print(dfFinal)
 print("Total:", total)
