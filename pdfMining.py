@@ -19,9 +19,7 @@ def getcost(beadtype, driver):
     driver.get('https://www.fusionbeads.com/search?keywords={}'.format(beadtype))
     try:
         wait = WebDriverWait(driver, 10)
-        wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='facets-item-cell-grid']" or
-                                                     "//div[@class='searchspring-no_results ss-targeted ng-scope']")))
-                                                                   "searchspring-no_results ss-targeted ng-scope"
+        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".facets-item-cell-grid, .searchspring-no_results")))
 
     except TimeoutError:
         pass
